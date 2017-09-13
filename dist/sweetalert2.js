@@ -1,5 +1,5 @@
 /*!
- * sweetalert2 v6.7.0
+ * sweetalert2 v6.6.10
  * Released under the MIT License.
  */
 (function (global, factory) {
@@ -24,11 +24,9 @@ var defaultParams = {
   showCancelButton: false,
   preConfirm: null,
   confirmButtonText: 'OK',
-  confirmButtonAriaLabel: '',
   confirmButtonColor: '#3085d6',
   confirmButtonClass: null,
   cancelButtonText: 'Cancel',
-  cancelButtonAriaLabel: '',
   cancelButtonColor: '#aaa',
   cancelButtonClass: null,
   buttonsStyling: true,
@@ -57,7 +55,8 @@ var defaultParams = {
   progressStepsDistance: '40px',
   onOpen: null,
   onClose: null,
-  useRejections: true
+  useRejections: true,
+  form: false
 };
 
 var swalPrefix = 'swal2-';
@@ -448,118 +447,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 
 
-var asyncGenerator = function () {
-  function AwaitValue(value) {
-    this.value = value;
-  }
 
-  function AsyncGenerator(gen) {
-    var front, back;
-
-    function send(key, arg) {
-      return new Promise(function (resolve, reject) {
-        var request = {
-          key: key,
-          arg: arg,
-          resolve: resolve,
-          reject: reject,
-          next: null
-        };
-
-        if (back) {
-          back = back.next = request;
-        } else {
-          front = back = request;
-          resume(key, arg);
-        }
-      });
-    }
-
-    function resume(key, arg) {
-      try {
-        var result = gen[key](arg);
-        var value = result.value;
-
-        if (value instanceof AwaitValue) {
-          Promise.resolve(value.value).then(function (arg) {
-            resume("next", arg);
-          }, function (arg) {
-            resume("throw", arg);
-          });
-        } else {
-          settle(result.done ? "return" : "normal", result.value);
-        }
-      } catch (err) {
-        settle("throw", err);
-      }
-    }
-
-    function settle(type, value) {
-      switch (type) {
-        case "return":
-          front.resolve({
-            value: value,
-            done: true
-          });
-          break;
-
-        case "throw":
-          front.reject(value);
-          break;
-
-        default:
-          front.resolve({
-            value: value,
-            done: false
-          });
-          break;
-      }
-
-      front = front.next;
-
-      if (front) {
-        resume(front.key, front.arg);
-      } else {
-        back = null;
-      }
-    }
-
-    this._invoke = send;
-
-    if (typeof gen.return !== "function") {
-      this.return = undefined;
-    }
-  }
-
-  if (typeof Symbol === "function" && Symbol.asyncIterator) {
-    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
-      return this;
-    };
-  }
-
-  AsyncGenerator.prototype.next = function (arg) {
-    return this._invoke("next", arg);
-  };
-
-  AsyncGenerator.prototype.throw = function (arg) {
-    return this._invoke("throw", arg);
-  };
-
-  AsyncGenerator.prototype.return = function (arg) {
-    return this._invoke("return", arg);
-  };
-
-  return {
-    wrap: function (fn) {
-      return function () {
-        return new AsyncGenerator(fn.apply(this, arguments));
-      };
-    },
-    await: function (value) {
-      return new AwaitValue(value);
-    }
-  };
-}();
 
 
 
@@ -790,13 +678,9 @@ var setParameters = function setParameters(params) {
     show(buttonsWrapper);
   }
 
-  // Edit text on confirm and cancel buttons
+  // Edit text on cancel and confirm buttons
   confirmButton.innerHTML = params.confirmButtonText;
   cancelButton.innerHTML = params.cancelButtonText;
-
-  // ARIA labels for confirm and cancel buttons
-  confirmButton.setAttribute('aria-label', params.confirmButtonAriaLabel);
-  cancelButton.setAttribute('aria-label', params.cancelButtonAriaLabel);
 
   // Set buttons to selected background colors
   if (params.buttonsStyling) {
@@ -1030,6 +914,25 @@ var sweetAlert = function sweetAlert() {
       }
     };
 
+    // Get form data
+    var getFormData = function getFormData() {
+      var formData = {}
+      var inputs = modal.querySelector('form').querySelectorAll('input,textarea,select');
+      for(var i in inputs){
+        if(i == "length")
+          continue
+        var input = inputs[i]
+        if(typeof input == "function")
+          continue
+        formData[input.getAttribute('name') || input.getAttribute('id') || i] = (
+          input.tagName == "INPUT" ? input.value :
+          input.tagName == "TEXTAREA" ? input.innerHTML :
+          input.value // select
+        )
+      }
+      return formData
+    }
+
     // input autofocus
     if (params.input) {
       setTimeout(function () {
@@ -1126,6 +1029,9 @@ var sweetAlert = function sweetAlert() {
               } else {
                 confirm(inputValue);
               }
+            } else if( params.form ) {
+              var formData = getFormData();
+              confirm(formData);
             } else {
               confirm(true);
             }
@@ -1792,7 +1698,7 @@ sweetAlert.resetDefaults = function () {
 
 sweetAlert.noop = function () {};
 
-sweetAlert.version = '6.7.0';
+sweetAlert.version = '6.6.10';
 
 sweetAlert.default = sweetAlert;
 
