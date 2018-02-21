@@ -927,11 +927,34 @@ var sweetAlert = function sweetAlert() {
         formData[input.getAttribute('name') || input.getAttribute('id') || i] = (
           input.tagName == "INPUT" ? input.value :
           input.tagName == "TEXTAREA" ? input.innerHTML :
+          input.tagName == "SELECT" ? getSelectValues(input) :
           input.value // select
         )
       }
       return formData
     }
+
+    var getSelectValues = function (select) {
+      var ret = [];
+
+      // fast but not universally supported
+      if (select.selectedOptions != undefined) {
+          for (var i=0; i < select.selectedOptions.length; i++) {
+              ret.push(select.selectedOptions[i].value);
+          }
+
+      // compatible, but can be painfully slow
+      } else {
+          for (var i=0; i < select.options.length; i++) {
+              if (select.options[i].selected) {
+                  ret.push(select.options[i].value);
+              }
+          }
+      }
+      if( ret.length == 1 ) return ret[0];
+      
+      return ret;
+  };
 
     // input autofocus
     if (params.input) {
